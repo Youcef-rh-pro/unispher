@@ -8,6 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+unishpher_api/
 dist
 dist-ssr
 *.local
