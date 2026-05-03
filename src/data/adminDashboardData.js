@@ -13,11 +13,11 @@ export const adminDashboardHeader = {
 };
 
 export const adminSidebarLinks = [
-  { id: "dashboard", label: "Dashboard", icon: "dashboard", active: true },
-  { id: "course-approvals", label: "Course Approvals", icon: "approvals", active: false },
-  { id: "user-registrations", label: "User Registrations", icon: "registrations", active: false },
-  { id: "announcements", label: "Announcements", icon: "announcements", active: false },
-  { id: "settings", label: "Settings", icon: "settings", active: false },
+  { id: "dashboard", label: "Dashboard", icon: "dashboard", path: "/dashboard" },
+  { id: "course-approvals", label: "Course Approvals", icon: "approvals", path: "/dashboard/course-approvals" },
+  { id: "user-registrations", label: "User Registrations", icon: "registrations", path: "/dashboard/user-registrations" },
+  { id: "announcements", label: "Announcements", icon: "announcements", path: "/dashboard/announcements" },
+  { id: "settings", label: "Settings", icon: "settings", path: "/dashboard/settings" },
 ];
 
 export const systemStatus = {

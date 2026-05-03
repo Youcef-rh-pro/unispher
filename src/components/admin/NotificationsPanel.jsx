@@ -12,6 +12,7 @@ export default function NotificationsPanel({
   activeFilter,
   notifications,
   onFilterChange,
+  onMarkAllRead,
   onClose,
 }) {
   if (!isOpen) {
@@ -29,12 +30,16 @@ export default function NotificationsPanel({
       >
         <header className="flex items-center justify-between border-b border-white/10 px-6 py-5">
           <div>
-            <h2 className="text-4xl font-semibold tracking-tight text-slate-100">Notifications</h2>
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-100 sm:text-4xl">Notifications</h2>
             <p className="mt-1 text-sm text-slate-400">Review recent activities and system alerts.</p>
           </div>
 
           <div className="flex items-center gap-4">
-            <button type="button" className="text-sm font-medium text-blue-300 transition hover:text-blue-200">
+            <button
+              type="button"
+              onClick={onMarkAllRead}
+              className="text-sm font-medium text-blue-300 transition hover:text-blue-200"
+            >
               Mark all as read
             </button>
             <button
@@ -72,6 +77,12 @@ export default function NotificationsPanel({
         </div>
 
         <div className="max-h-[65vh] overflow-y-auto">
+          {notifications.length === 0 && (
+            <div className="px-6 py-14 text-center text-slate-400">
+              No notifications for this filter yet.
+            </div>
+          )}
+
           {notifications.map((notice) => (
             <article
               key={notice.id}
@@ -87,7 +98,7 @@ export default function NotificationsPanel({
                 </div>
 
                 <div>
-                  <h3 className="text-3xl font-medium leading-tight text-slate-100">{notice.title}</h3>
+                  <h3 className="text-xl font-medium leading-tight text-slate-100 sm:text-3xl">{notice.title}</h3>
                   <p className="mt-2 max-w-4xl text-sm leading-relaxed text-slate-300">{notice.message}</p>
                   {notice.actionLabel && (
                     <button

@@ -1,13 +1,25 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+    ACCESS_TOKEN_STORAGE_KEY,
+    API_BASE_URL,
+    REFRESH_TOKEN_STORAGE_KEY,
+} from "../config/api";
 
 export default function Login() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [formData, setFormData] = useState({
         idNumber: "",
         password: "",
     });
     const [error, setError] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const reason = searchParams.get("reason");
+    const accessMessage = reason === "admin-only"
+        ? "This university dashboard is restricted to admin accounts only."
+        : null;
 
     const updateFormData = (field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -16,17 +28,72 @@ export default function Login() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+
+        const identifier = formData.idNumber.trim();
+        const password = formData.password;
+        if (!identifier || !password) {
+            setError("Student ID or email and password are required.");
+            return;
+        }
+
+        const payload = { password };
+
+        if (identifier.includes("@")) {
+            payload.email = identifier.toLowerCase();
+        } else {
+            const numericStudentId = identifier.replace(/\D/g, "");
+            if (numericStudentId.length !== 12) {
+                setError("Use a valid 12-digit student ID or an email address.");
+                return;
+            }
+
+            payload.student_id = numericStudentId;
+        }
+
+        setIsSubmitting(true);
+
         try {
-            const response = await fetch('/api/login', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-device': navigator.userAgent || 'browser-device',
+                },
+                body: JSON.stringify(payload)
             });
 
             const result = await response.json();
 
             if (!response.ok) {
-                setError(result.message || "Invalid credentials");
+                if (result.message === "Can not login with email") {
+                    setError("Student accounts must sign in with a 12-digit student ID. Email login is for teacher/admin accounts.");
+                } else {
+                    setError(result.message || "Invalid credentials");
+                }
+                return;
+            }
+
+            if (!result.accessToken || !result.refreshToken) {
+                setError("Login response is missing authentication tokens.");
+                return;
+            }
+
+            localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, result.accessToken);
+            localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, result.refreshToken);
+
+            const profileResponse = await fetch(`${API_BASE_URL}/api/user/me`, {
+                headers: {
+                    Authorization: `Bearer ${result.accessToken}`,
+                },
+            });
+
+            const profileResult = await profileResponse.json().catch(() => ({}));
+            const isAdmin = profileResponse.ok && profileResult?.profile?.role === "ADMIN";
+
+            if (!isAdmin) {
+                localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+                localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
+                setError("Only university admin accounts can access the dashboard.");
                 return;
             }
 
@@ -34,6 +101,8 @@ export default function Login() {
         } catch (err) {
             console.error(err);
             setError("An error occurred. Please try again later.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -59,18 +128,22 @@ export default function Login() {
                     </div>
 
                     <form onSubmit={handleLogin} className="space-y-5">
+                        {accessMessage && <div className="p-3 text-sm text-amber-700 bg-amber-50 rounded-lg">{accessMessage}</div>}
                         {error && <div className="p-3 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
 
                         <div>
-                            <label className="block text-sm font-bold text-gray-900 mb-1">Student/Staff ID Number</label>
+                            <label className="block text-sm font-bold text-gray-900 mb-1">Student ID or Email</label>
                             <input
                                 type="text"
-                                placeholder="eg.UN31202054589878"
+                                placeholder="eg.123456789012 or name@university.edu"
                                 value={formData.idNumber}
                                 onChange={(e) => updateFormData("idNumber", e.target.value)}
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:border-blue-500"
                                 required
                             />
+                            <p className="mt-1 text-xs text-gray-500">
+                                Students: use 12-digit student ID. Teachers/Admins: use email.
+                            </p>
                         </div>
 
                         <div>
@@ -101,9 +174,10 @@ export default function Login() {
 
                         <button
                             type="submit"
+                            disabled={isSubmitting}
                             className="w-full py-3 bg-[#3b82f6] text-white rounded-lg font-medium hover:bg-blue-600 transition flex justify-center items-center"
                         >
-                            Login
+                            {isSubmitting ? "Signing in..." : "Login"}
                             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                             </svg>

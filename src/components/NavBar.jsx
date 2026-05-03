@@ -38,10 +38,10 @@ export default function Navbar() {
                 </ul>
 
                 <div className="hidden md:flex items-center space-x-3">
-                    <Link to="/login" className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 transition">
+                    <Link to="/login" className="px-4 py-2 text-sm font-medium text-gray-900 border border-gray-300 rounded-md hover:bg-gray-100 transition">
                         Login
                     </Link>
-                    <Link to="/register" className="px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-md hover:bg-gray-900 transition">
+                    <Link to="/register" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition">
                         Join Now
                     </Link>
                 </div>
@@ -54,11 +54,11 @@ export default function Navbar() {
                         <li><Link to="/" className="block text-gray-600 hover:text-gray-900 transition">Universities</Link></li>
                         <li><Link to="/" className="block text-gray-600 hover:text-gray-900 transition">Contact-Us</Link></li>
                     </ul>
-                    \<div className="flex flex-col space-y-2 mt-4">
-                        <Link to="/login" className="w-full text-center px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 transition">
+                    <div className="flex flex-col space-y-2 mt-4">
+                        <Link to="/login" className="w-full text-center px-4 py-2 text-sm font-medium text-gray-900 border border-gray-300 rounded-md hover:bg-gray-100 transition">
                             Login
                         </Link>
-                        <Link to="/register" className="w-full text-center px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-md hover:bg-gray-900 transition">
+                        <Link to="/register" className="w-full text-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition">
                             Join Now
                         </Link>
                     </div>
